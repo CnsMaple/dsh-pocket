@@ -1,3 +1,16 @@
+## [2.10.4](https://github.com/shaobeichen/dsh-pocket/compare/v2.10.3...v2.10.4) (2026-09-10)
+
+
+### Bug Fixes
+
+* **client:** prevent iOS Safari input auto-zoom on mobile ([8d5b3fa](https://github.com/shaobeichen/dsh-pocket/commit/8d5b3fa1a14385816e61f92bd83fb239f7d8e74f)), closes [#114](https://github.com/shaobeichen/dsh-pocket/issues/114)
+* **mobile:** 侧边栏先开后弹出 aria-modal 弹窗时自动收起，修复卡死 ([#99](https://github.com/shaobeichen/dsh-pocket/issues/99)) ([f2e60b0](https://github.com/shaobeichen/dsh-pocket/commit/f2e60b0eb03ac1b065788e231590a56316a7cfcf))
+* **proxy:** shim transport.createApiClient for dsh 0.1.1-rc.2 (issue [#96](https://github.com/shaobeichen/dsh-pocket/issues/96)) ([61cadf8](https://github.com/shaobeichen/dsh-pocket/commit/61cadf871ec817f51135277b7fb3085d9492959e))
+* **proxy:** 移除与 DSH Desktop 2.0.4+ 不兼容的 LOOPBACK_ENV_PATCH，修复远程/手机访问白屏 ([#105](https://github.com/shaobeichen/dsh-pocket/issues/105)) ([a1b813d](https://github.com/shaobeichen/dsh-pocket/commit/a1b813d854da5900b55c5893f3190a272cd4a0fc)), closes [#100](https://github.com/shaobeichen/dsh-pocket/issues/100) [#58](https://github.com/shaobeichen/dsh-pocket/issues/58)
+* **rpc:** 适配 dsh v0.1.5-alpha.1 的 webServer inject 收缩，堵住启动崩溃 ([#112](https://github.com/shaobeichen/dsh-pocket/issues/112)) ([2ac8efd](https://github.com/shaobeichen/dsh-pocket/commit/2ac8efdb46de19959c1fc59eeddf2f12b42cb909)), closes [#109](https://github.com/shaobeichen/dsh-pocket/issues/109) [#113](https://github.com/shaobeichen/dsh-pocket/issues/113) [#111](https://github.com/shaobeichen/dsh-pocket/issues/111)
+* **security:** 收紧限速身份键与登录比较，修隧道失败态残留，移除已删功能的 README 残留 ([517eb00](https://github.com/shaobeichen/dsh-pocket/commit/517eb004ce869f5e140159dfa118ab833a37fd6c)), closes [#69](https://github.com/shaobeichen/dsh-pocket/issues/69)
+* **tunnel:** 进程退出不再清除自动恢复标记，修复重启后公网隧道不自动恢复 ([#107](https://github.com/shaobeichen/dsh-pocket/issues/107)) ([db1e5c4](https://github.com/shaobeichen/dsh-pocket/commit/db1e5c418cae91ae1e56f4d6c5c05413ddea02c2)), closes [#11](https://github.com/shaobeichen/dsh-pocket/issues/11) [#106](https://github.com/shaobeichen/dsh-pocket/issues/106)
+
 ## [2.10.3](https://github.com/shaobeichen/dsh-pocket/compare/v2.10.2...v2.10.3) (2026-09-03)
 
 
