@@ -354,28 +354,6 @@ function MobileNavOverlay({ toggleSidebar, t }) {
     document.addEventListener("click", onOutsideClick, true);
     return () => document.removeEventListener("click", onOutsideClick, true);
   }, [mobile, open, toggleSidebar]);
-  (0, import_react.useEffect)(() => {
-    // 修复 issue #99：侧边栏先开后，若页面弹出带 aria-modal 的对话框（如 PIN / 初始化弹窗），
-    // 弹窗会盖住切换按钮，且 Escape / 点 backdrop 因下面的 aria-modal 守卫被拦，导致侧边栏卡死无法关闭。
-    // 这里在侧边栏处于打开态时，监听新出现的 aria-modal 节点，一旦弹出模态框立即收起侧边栏。
-    if (!mobile || !open) return;
-    const observer = new MutationObserver((mutations) => {
-      for (const m of mutations) {
-        let hit = false;
-        m.addedNodes.forEach((node) => {
-          if (!(node instanceof Element)) return;
-          if (node.matches && node.matches('[aria-modal="true"]')) hit = true;
-          else if (node.querySelector && node.querySelector('[aria-modal="true"]')) hit = true;
-        });
-        if (hit) {
-          toggleSidebar();
-          break;
-        }
-      }
-    });
-    observer.observe(document.documentElement, { childList: true, subtree: true });
-    return () => observer.disconnect();
-  }, [mobile, open, toggleSidebar]);
   if (!mobile) return null;
   return /* @__PURE__ */ React.createElement(React.Fragment, null, open && /* @__PURE__ */ React.createElement("div", { "data-mobile-nav": "backdrop" }), fabVisible && !open && /* @__PURE__ */ React.createElement(
     "button",
@@ -1549,6 +1527,19 @@ var MOBILE_CSS = `
   [data-mobile-nav="copy-file"][disabled] {
     opacity: .55 !important;
     cursor: default !important;
+  }
+}
+
+/* ---------- mobile: stop iOS Safari forced zoom on input focus ----------
+ * Inputs are rendered with inline fontSize 13-14px, below the 16px threshold
+ * that makes iOS Safari zoom the whole page on focus (and never recover).
+ * Force the safe 16px minimum on narrow viewports only, so desktop keeps its
+ * tighter metrics. !important is required to beat the inline styles. */
+@media (max-width: 1024px) {
+  input,
+  textarea,
+  [contenteditable="true"] {
+    font-size: 16px !important;
   }
 }
 
