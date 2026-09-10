@@ -1,3 +1,10 @@
+## [2.10.6](https://github.com/shaobeichen/dsh-pocket/compare/v2.10.5...v2.10.6) (2026-09-10)
+
+
+### Bug Fixes
+
+* **mobile:** 替换手机端模型设置加载失败提示为引导信息，增加本地真机冒烟测试 ([5ab2ad4](https://github.com/shaobeichen/dsh-pocket/commit/5ab2ad444ba276c5df2bf87fa104c4b16b2081f9))
+
 ## [2.10.5](https://github.com/shaobeichen/dsh-pocket/compare/v2.10.4...v2.10.5) (2026-09-10)
 
 
