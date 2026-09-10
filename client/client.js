@@ -1796,6 +1796,35 @@ function mobileApply(ctx) {
     );
     return startFileGuard(readFile);
   }, "dsh-mobile-nav: file open guard + copy button + hide add-workspace (issue #17)");
+  ctx.effect(() => {
+    if (!narrow.matches) return () => {
+    };
+    const PHRASES = ["加载提供方目录失败", "Settings are unavailable in this browser"];
+    const NOTICE = "手机上不支持模型设置，请去电脑端修改设置";
+    const findDeepest = (el) => {
+      let deepest = el;
+      for (const child of el.querySelectorAll("*")) {
+        if (PHRASES.some((p) => (child.textContent ?? "").includes(p))) deepest = child;
+      }
+      return deepest;
+    };
+    const patch = () => {
+      for (const el of document.querySelectorAll("body *")) {
+        const t = el.textContent ?? "";
+        if (!PHRASES.some((p) => t.includes(p))) continue;
+        if (el.dataset?.dshpModelNotice === "1") continue;
+        const target = findDeepest(el);
+        target.textContent = NOTICE;
+        target.dataset.dshpModelNotice = "1";
+      }
+    };
+    const observer = new MutationObserver(patch);
+    observer.observe(document.body, { childList: true, subtree: true, characterData: true });
+    patch();
+    return () => {
+      observer.disconnect();
+    };
+  }, "dsh-mobile-nav: replace model-settings load error with mobile hint");
   ctx.slots.inject("conversation.session.header.actions", () => ctx.slots.register({
     name: "conversation.session.header.actions",
     id: "mobile-nav-toggle",
