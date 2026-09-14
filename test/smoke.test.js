@@ -150,3 +150,70 @@ test('Windows 更新 spawn（PR #54）：performUpdate 的 spawn 必须带 shell
   const seg = src.slice(src.indexOf("spawn('dsh'"), src.indexOf('spawn(\'dsh\')') + 500);
   assert.ok(src.includes("shell: process.platform === 'win32'"), 'spawn 带 shell: win32（npm shim ENOENT / Node22 EINVAL）');
 });
+
+// —— fork 唯一功能：每次启动自动开启公网 + 就绪即推飞书（纯 URL）——
+test('fork 功能：启动自动开公网并把纯 URL 推送到飞书 Webhook', async () => {
+  const fsp = await import('node:fs/promises');
+  const os = await import('node:os');
+  const path = await import('node:path');
+  const home = await fsp.mkdtemp(path.join(os.tmpdir(), 'dshp-boot-'));
+  await fsp.mkdir(path.join(home, 'dsh-pocket'), { recursive: true });
+
+  // 假飞书 webhook 接收端：断言 text 正文恰为隧道 URL
+  const hits = [];
+  const hook = createServer((req, res) => {
+    let body = '';
+    req.on('data', (c) => { body += c; });
+    req.on('end', () => {
+      try { hits.push(JSON.parse(body)); } catch { hits.push(null); }
+      res.writeHead(200, { 'content-type': 'application/json' });
+      res.end('{"code":0,"msg":"success"}');
+    });
+  });
+  await new Promise((r) => hook.listen(0, '127.0.0.1', r));
+
+  const TUNNEL_URL = 'https://boot-abc.trycloudflare.com';
+  await fsp.writeFile(
+    path.join(home, 'dsh-pocket', 'settings.json'),
+    JSON.stringify({ feishuWebhook: `http://127.0.0.1:${hook.address().port}/hook/test` }),
+    'utf8',
+  );
+
+  const prevHome = process.env.DSH_HOME;
+  process.env.DSH_HOME = home;
+  try {
+    const mod = await import('../lib/index.js?boot-test=1');
+    const ctx = {
+      logger: () => ({ error() {}, info() {}, warn() {} }),
+      webServer: { port: 3080 },
+      on: () => () => {},
+      effect: () => () => {},
+    };
+    // 真实 service + 桩隧道/代理：apply() 的启动自动开公网 → onTunnelReady → 飞书推送
+    mod.apply(ctx, {}, {
+      home,
+      dshPort: 3080,
+      port: 3081,
+      restart: () => ({ helperPid: 0 }),
+      restartNotice: async () => null,
+      createProxy: async () => ({ port: 3081, close: async () => {}, on: () => () => {} }),
+      startTunnel: async () => TUNNEL_URL,
+      lanIPv4: () => '192.168.1.50',
+      lanCandidates: async () => ['192.168.1.50'],
+      encodeQr: async (t) => `data:qr;${t}`,
+    });
+    let got = false;
+    for (let i = 0; i < 60 && !got; i++) {
+      await new Promise((r) => setTimeout(r, 50));
+      got = hits.length > 0;
+    }
+    assert.ok(got, '启动后隧道自动开启并推送了飞书');
+    assert.equal(hits[0].msg_type, 'text');
+    assert.equal(hits[0].content.text, TUNNEL_URL, '推送正文是纯 URL，无附加文案');
+  } finally {
+    if (prevHome === undefined) delete process.env.DSH_HOME;
+    else process.env.DSH_HOME = prevHome;
+    await new Promise((r) => hook.close(r));
+    await fsp.rm(home, { recursive: true, force: true });
+  }
+});
